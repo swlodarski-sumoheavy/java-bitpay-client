@@ -13,7 +13,7 @@ public class MinerFeesItemTest {
     @Test
     public void it_should_manipulate_satoshisPerByte() {
         // given
-        Integer expected = 765;
+        Double expected = 765;
         MinerFeesItem testedClass = this.getTestedClass();
 
         // when
