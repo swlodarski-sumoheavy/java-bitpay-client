@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MinerFeesItem {
 
-    protected Integer satoshisPerByte;
+    protected Double satoshisPerByte;
     protected Integer totalFee;
     protected Double fiatAmount;
 
@@ -33,7 +33,7 @@ public class MinerFeesItem {
      * @return the satoshis per byte
      */
     @JsonIgnore
-    public Integer getSatoshisPerByte() {
+    public Double getSatoshisPerByte() {
         return this.satoshisPerByte;
     }
 
@@ -43,7 +43,7 @@ public class MinerFeesItem {
      * @param satoshisPerByte the satoshis per byte
      */
     @JsonProperty("satoshisPerByte")
-    public void setSatoshisPerByte(Integer satoshisPerByte) {
+    public void setSatoshisPerByte(Double satoshisPerByte) {
         this.satoshisPerByte = satoshisPerByte;
     }
 
