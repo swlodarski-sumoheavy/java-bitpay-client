@@ -58,6 +58,7 @@ public class CurrencyClient implements ResourceClient {
      *
      * @param currencyCode String Currency code for which the info will be retrieved.
      * @return Map |null
+     * @throws BitPayGenericException BitPayGenericException class
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> getInfo(String currencyCode) throws BitPayGenericException {
