@@ -66,6 +66,7 @@ public class KeyUtils {
      *
      * @param privateKey the private key
      * @return the ec key
+     * @throws BitPayGenericException BitPayGenericException class
      */
     public static ECKey createEcKeyFromHexString(String privateKey) throws BitPayGenericException {
         byte[] bytes = hexToBytes(privateKey);
@@ -78,6 +79,7 @@ public class KeyUtils {
      *
      * @param privKeyFile the priv key file
      * @return the ec key
+     * @throws BitPayGenericException BitPayGenericException class
      * @throws IOException the io exception
      */
     public static ECKey createEcKeyFromHexStringFile(String privKeyFile) throws IOException, BitPayGenericException {

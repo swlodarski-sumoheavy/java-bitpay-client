@@ -79,8 +79,8 @@ public class RefundClient implements ResourceClient {
      *
      * @param refund Refund request data
      * @return Refund
-`    * @throws BitPayApiException BitPayApiException class
-     * @throws BitPayGenericException BitPayGenericException class`
+     * @throws BitPayApiException BitPayApiException class
+     * @throws BitPayGenericException BitPayGenericException class
      */
     public Refund create(final Refund refund) throws BitPayApiException, BitPayGenericException {
         if (Objects.isNull(refund)) {
@@ -146,6 +146,7 @@ public class RefundClient implements ResourceClient {
      * @param guid Guid
      * @return Refund
      * @throws BitPayApiException BitPayException
+     * @throws BitPayGenericException BitPayGenericException class
      */
     public Refund getByGuid(final String guid) throws BitPayApiException, BitPayGenericException {
         validateRefundId(guid);
