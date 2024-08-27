@@ -36,6 +36,7 @@ public class BitPayClient {
     private final HttpRequestFactory httpRequestFactory;
     private final String baseUrl;
     private final ECKey ecKey;
+    private String platformInfo = null;
 
     /**
      * Instantiates a new Bit pay client.
@@ -55,6 +56,29 @@ public class BitPayClient {
         this.baseUrl = baseUrl;
         this.httpRequestFactory = httpRequestFactory;
         this.ecKey = ecKey;
+    }
+
+    /**
+     * Instantiates a new Bit pay client.
+     *
+     * @param httpClient         the http client
+     * @param httpRequestFactory the http request factory
+     * @param baseUrl            the base url
+     * @param ecKey              the ECKey
+     * @param platformInfo       the Platform Info
+     */
+    public BitPayClient(
+        final HttpClient httpClient,
+        final HttpRequestFactory httpRequestFactory,
+        final String baseUrl,
+        final ECKey ecKey,
+        final String platformInfo
+    ) {
+        this.httpClient = httpClient;
+        this.baseUrl = baseUrl;
+        this.httpRequestFactory = httpRequestFactory;
+        this.ecKey = ecKey;
+        this.platformInfo = platformInfo;
     }
 
     /**
@@ -241,12 +265,9 @@ public class BitPayClient {
 
             httpPut.setEntity(new ByteArrayEntity(json.getBytes(StandardCharsets.UTF_8)));
 
-            this.addSignatureRequiredHeaders(httpPut, endpoint + json);
-            httpPut.addHeader("x-accept-version", Config.BITPAY_API_VERSION);
-            httpPut.addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+            this.addDefaultHeaders(httpPut);
             httpPut.addHeader("Content-Type", "application/json");
-            httpPut.addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
-            httpPut.addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+            this.addSignatureRequiredHeaders(httpPut, endpoint + json);
 
             LoggerProvider.getLogger().logRequest(HttpPut.METHOD_NAME, endpoint, httpPut.toString());
 
@@ -266,6 +287,9 @@ public class BitPayClient {
         httpMessage.addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
         httpMessage.addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
         httpMessage.addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+        if (this.platformInfo != null && !this.platformInfo.isEmpty()) {
+            httpMessage.addHeader("x-bitPay-platform-info", this.platformInfo);
+        }
     }
 
     private void addSignatureRequiredHeaders(AbstractHttpMessage httpMessage, String uri)
