@@ -94,6 +94,18 @@ public class ClientTest {
     }
 
     @Test
+    public void it_should_provide_pos_client_with_platform_info_header() throws BitPayGenericException {
+        // given
+        String posToken = "posToken";
+
+        // when
+        Client bitpay = Client.createPosClient(new PosToken(posToken), "MyPlatform_v1.0.0");
+
+        // then
+        Assertions.assertEquals(posToken, bitpay.getAccessToken(Facade.POS));
+    }
+
+    @Test
     public void it_should_provide_client_by_key() throws BitPayGenericException {
         // given
         String privateKey =
@@ -110,12 +122,41 @@ public class ClientTest {
     }
 
     @Test
+    public void it_should_provide_client_by_key_with_platform_info_header() throws BitPayGenericException {
+        // given
+        String privateKey =
+            "3082013102010104208ae30afbc7e93cb10cb983f70863e546b53f0b2c6158b1a71b576fd09790cff3a081e33081e0020101302c06072a8648ce3d0101022100fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f3044042000000000000000000000000000000000000000000000000000000000000000000420000000000000000000000000000000000000000000000000000000000000000704410479be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8022100fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141020101a124032200035d6a7e38d7c08b8a626e2390d0360a72a58bd1c5e1348e0eb810d4bbab3d3adf";
+        String merchantToken = "merchantToken";
+        TokenContainer tokens = new TokenContainer();
+        tokens.addMerchant(merchantToken);
+
+        // when
+        Client bitpay = Client.createClientByPrivateKey(new PrivateKey(privateKey), tokens, Environment.TEST, "MyPlatform_v1.0.0");
+
+        // then
+        Assertions.assertEquals(merchantToken, bitpay.getAccessToken(Facade.MERCHANT));
+    }
+
+    @Test
     public void it_should_provide_client_by_config() throws BitPayGenericException {
         // given
         String path = System.getProperty("user.dir") + "/src/test/java/com/bitpay/sdk/BitPay.config.json";
 
         // when
         Client bitpay = Client.createClientByConfigFilePath(new ConfigFilePath(path));
+
+        // then
+        Assertions.assertEquals("merchantToken", bitpay.getAccessToken(Facade.MERCHANT));
+        Assertions.assertEquals("payoutToken", bitpay.getAccessToken(Facade.PAYOUT));
+    }
+
+    @Test
+    public void it_should_provide_client_by_config_with_platform_info_header() throws BitPayGenericException {
+        // given
+        String path = System.getProperty("user.dir") + "/src/test/java/com/bitpay/sdk/BitPay.config.json";
+
+        // when
+        Client bitpay = Client.createClientByConfigFilePath(new ConfigFilePath(path), "MyPlatform_v1.0.0");
 
         // then
         Assertions.assertEquals("merchantToken", bitpay.getAccessToken(Facade.MERCHANT));

@@ -108,6 +108,43 @@ public class BitPayClientTest {
     }
 
     @Test
+    public void it_should_prepare_get_request_with_parameters_and_platform_info_header()
+        throws IOException, URISyntaxException {
+        // given
+        final String testUrl = "/test";
+        final HttpGet httpGet = Mockito.mock(HttpGet.class);
+        final List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
+        parameters.add(new BasicNameValuePair("key", "value"));
+
+        Mockito.when(this.httpRequestFactory.createHttpGet(BASE_URL + testUrl)).thenReturn(httpGet);
+
+        String platformInfo = "MyPlatform_v1.0.0";
+        BitPayClient testedClass = this.getTestedClass(platformInfo);
+
+        // when
+        try {
+            testedClass.get(testUrl, parameters, true);
+        } catch (Exception e) {
+            // missing response
+        }
+
+        // then
+        Mockito.verify(httpClient, Mockito.times(1)).execute(httpGet);
+        Mockito.verify(httpGet, Mockito.times(1)).setURI(new URI("http://localhost/test?key=value"));
+        Mockito.verify(httpGet, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-signature"), ArgumentMatchers.anyString());
+        Mockito.verify(httpGet, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-identity"), ArgumentMatchers.anyString());
+        Mockito.verify(httpGet, Mockito.times(1)).addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+        Mockito.verify(httpGet, Mockito.times(1)).addHeader("x-accept-version", Config.BITPAY_API_VERSION);
+        Mockito.verify(httpGet, Mockito.times(1)).addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
+        Mockito.verify(httpGet, Mockito.times(1))
+            .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+        Mockito.verify(httpGet, Mockito.times(1))
+            .addHeader("x-bitPay-platform-info", platformInfo);
+    }
+
+    @Test
     public void it_should_throws_bitpay_api_exception_when_something_is_wrong_for_get_requests() {
         BitPayApiException exception1 = Assertions.assertThrows(
             BitPayApiException.class,
@@ -307,6 +344,42 @@ public class BitPayClientTest {
     }
 
     @Test
+    public void it_should_prepare_delete_request_with_platform_info() throws IOException, URISyntaxException {
+        // given
+        final String testUrl = "/test";
+        final HttpDelete httpDelete = Mockito.mock(HttpDelete.class);
+        final List<BasicNameValuePair> parameters = new ArrayList<BasicNameValuePair>();
+        parameters.add(new BasicNameValuePair("key", "value"));
+
+        Mockito.when(this.httpRequestFactory.createHttpDelete(BASE_URL + testUrl)).thenReturn(httpDelete);
+
+        String platformInfo = "MyPlatform_v1.0.0";
+        BitPayClient testedClass = this.getTestedClass(platformInfo);
+
+        // when
+        try {
+            testedClass.delete(testUrl, parameters);
+        } catch (Exception e) {
+            // missing response
+        }
+
+        // then
+        Mockito.verify(httpClient, Mockito.times(1)).execute(httpDelete);
+        Mockito.verify(httpDelete, Mockito.times(1)).setURI(new URI("http://localhost/test?key=value"));
+        Mockito.verify(httpDelete, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-signature"), ArgumentMatchers.anyString());
+        Mockito.verify(httpDelete, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-identity"), ArgumentMatchers.anyString());
+        Mockito.verify(httpDelete, Mockito.times(1)).addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+        Mockito.verify(httpDelete, Mockito.times(1)).addHeader("x-accept-version", Config.BITPAY_API_VERSION);
+        Mockito.verify(httpDelete, Mockito.times(1)).addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
+        Mockito.verify(httpDelete, Mockito.times(1))
+            .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+        Mockito.verify(httpDelete, Mockito.times(1))
+            .addHeader("x-bitPay-platform-info", platformInfo);
+    }
+
+    @Test
     public void it_should_prepare_post_request() throws IOException {
         // given
         final String testUrl = "/test";
@@ -336,6 +409,41 @@ public class BitPayClientTest {
         Mockito.verify(httpPost, Mockito.times(1)).addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
         Mockito.verify(httpPost, Mockito.times(1))
             .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+    }
+
+    @Test
+    public void it_should_prepare_post_request_with_platform_info_header() throws IOException {
+        // given
+        final String testUrl = "/test";
+        final String json = "{\"key\": \"value\"}";
+        final HttpPost httpPost = Mockito.mock(HttpPost.class);
+
+        Mockito.when(this.httpRequestFactory.createHttpPost(BASE_URL + testUrl)).thenReturn(httpPost);
+
+        String platformInfo = "MyPlatform_v1.0.0";
+        BitPayClient testedClass = this.getTestedClass(platformInfo);
+
+        // when
+        try {
+            testedClass.post(testUrl, json, true);
+        } catch (Exception e) {
+            // missing response
+        }
+
+        // then
+        Mockito.verify(httpClient, Mockito.times(1)).execute(httpPost);
+        Mockito.verify(httpPost, Mockito.times(1)).setEntity(ArgumentMatchers.any(ByteArrayEntity.class));
+        Mockito.verify(httpPost, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-signature"), ArgumentMatchers.anyString());
+        Mockito.verify(httpPost, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-identity"), ArgumentMatchers.anyString());
+        Mockito.verify(httpPost, Mockito.times(1)).addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+        Mockito.verify(httpPost, Mockito.times(1)).addHeader("x-accept-version", Config.BITPAY_API_VERSION);
+        Mockito.verify(httpPost, Mockito.times(1)).addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
+        Mockito.verify(httpPost, Mockito.times(1))
+            .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+        Mockito.verify(httpPost, Mockito.times(1))
+            .addHeader("x-bitPay-platform-info", platformInfo);
     }
 
     @Test
@@ -370,9 +478,48 @@ public class BitPayClientTest {
             .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
     }
 
+    @Test
+    public void it_should_prepare_put_request_with_platform_info_header() throws BitPayGenericException, BitPayApiException, IOException {
+        // given
+        final String testUrl = "/test";
+        final String json = "{\"key\": \"value\"}";
+        final HttpPut httpPut = Mockito.mock(HttpPut.class);
+
+        Mockito.when(this.httpRequestFactory.createHttpPut(BASE_URL + testUrl)).thenReturn(httpPut);
+
+        String platformInfo = "MyPlatform_v1.0.0";
+        BitPayClient testedClass = this.getTestedClass(platformInfo);
+
+        // when
+        try {
+            testedClass.update(testUrl, json);
+        } catch (Exception e) {
+            // missing response
+        }
+
+        // then
+        Mockito.verify(httpClient, Mockito.times(1)).execute(httpPut);
+        Mockito.verify(httpPut, Mockito.times(1)).setEntity(ArgumentMatchers.any(ByteArrayEntity.class));
+        Mockito.verify(httpPut, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-signature"), ArgumentMatchers.anyString());
+        Mockito.verify(httpPut, Mockito.times(1))
+            .addHeader(ArgumentMatchers.eq("x-identity"), ArgumentMatchers.anyString());
+        Mockito.verify(httpPut, Mockito.times(1)).addHeader("X-BitPay-Plugin-Info", Config.BITPAY_PLUGIN_INFO);
+        Mockito.verify(httpPut, Mockito.times(1)).addHeader("x-accept-version", Config.BITPAY_API_VERSION);
+        Mockito.verify(httpPut, Mockito.times(1)).addHeader("x-bitpay-api-frame", Config.BITPAY_API_FRAME);
+        Mockito.verify(httpPut, Mockito.times(1))
+            .addHeader("x-bitpay-api-frame-version", Config.BITPAY_API_FRAME_VERSION);
+        Mockito.verify(httpPut, Mockito.times(1))
+            .addHeader("x-bitPay-platform-info", platformInfo);
+    }
+
 
 
     private BitPayClient getTestedClass() {
         return new BitPayClient(this.httpClient, this.httpRequestFactory, BASE_URL, new ECKey());
+    }
+
+    private BitPayClient getTestedClass(String platformInfo) {
+        return new BitPayClient(this.httpClient, this.httpRequestFactory, BASE_URL, new ECKey(), platformInfo);
     }
 }

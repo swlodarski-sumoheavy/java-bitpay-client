@@ -86,6 +86,17 @@ public class Client {
     /**
      * Constructor for POS facade.
      *
+     * @param token        POS token
+     * @param platformInfo Platform info
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public Client(PosToken token, String platformInfo) throws BitPayGenericException {
+        this(token, Environment.PROD, platformInfo);
+    }
+
+    /**
+     * Constructor for POS facade.
+     *
      * @param token       POS token
      * @param environment Environment
      * @throws BitPayGenericException BitPayGenericException class
@@ -105,6 +116,35 @@ public class Client {
             new HttpRequestFactory(),
             getBaseUrl(environment),
             null
+        );
+        this.guidGenerator = new GuidGenerator();
+    }
+
+    /**
+     * Constructor for POS facade.
+     *
+     * @param token        POS token
+     * @param environment  Environment
+     * @param platformInfo Platform info
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public Client(
+        PosToken token,
+        Environment environment,
+        String platformInfo
+    ) throws BitPayGenericException {
+        if (Objects.isNull(token) || Objects.isNull(environment)) {
+            BitPayExceptionProvider.throwMissingParameterException();
+        }
+
+        this.tokenContainer = new TokenContainer();
+        this.tokenContainer.addPos(token.value());
+        this.bitPayClient = new BitPayClient(
+            getHttpClient(null, null),
+            new HttpRequestFactory(),
+            getBaseUrl(environment),
+            null,
+            platformInfo
         );
         this.guidGenerator = new GuidGenerator();
     }
@@ -141,6 +181,38 @@ public class Client {
     /**
      * Constructor for use if the keys and SIN are managed by this library.
      *
+     * @param environment      Target environment. Options: Env.Test / Env.Prod
+     * @param privateKey       The full path to the securely located private key or the HEX key value.
+     * @param tokenContainer   Object containing the available tokens.
+     * @param proxyDetails     HttpHost Optional Proxy setting (set to NULL to ignore)
+     * @param proxyCredentials CredentialsProvider Optional Proxy Basic Auth Credentials (set to NULL to ignore)
+     * @param platformInfo     Platform Info
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public Client(
+        Environment environment,
+        PrivateKey privateKey,
+        TokenContainer tokenContainer,
+        HttpHost proxyDetails,
+        CredentialsProvider proxyCredentials,
+        String platformInfo
+    ) throws BitPayGenericException {
+        ECKey ecKey = getEcKey(privateKey);
+        this.tokenContainer = tokenContainer;
+        this.deriveIdentity(ecKey);
+        this.bitPayClient = new BitPayClient(
+            getHttpClient(proxyDetails, proxyCredentials),
+            new HttpRequestFactory(),
+            getBaseUrl(environment),
+            ecKey,
+            platformInfo
+        );
+        this.guidGenerator = new GuidGenerator();
+    }
+
+    /**
+     * Constructor for use if the keys and SIN are managed by this library.
+     *
      * @param configFilePath   The path to the configuration file.
      * @param proxy            HttpHost Optional Proxy setting (set to NULL to ignore)
      * @param proxyCredentials CredentialsProvider Optional Proxy Basic Auth Credentials (set to NULL to ignore)
@@ -164,6 +236,40 @@ public class Client {
             new HttpRequestFactory(),
             getBaseUrl(config.getEnvironment()),
             ecKey
+        );
+        this.guidGenerator = new GuidGenerator();
+    }
+
+
+    /**
+     * Constructor for use if the keys and SIN are managed by this library.
+     *
+     * @param configFilePath   The path to the configuration file.
+     * @param proxy            HttpHost Optional Proxy setting (set to NULL to ignore)
+     * @param proxyCredentials CredentialsProvider Optional Proxy Basic Auth Credentials (set to NULL to ignore)
+     * @param platformInfo     Platform Info
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public Client(
+        ConfigFilePath configFilePath,
+        HttpHost proxy,
+        CredentialsProvider proxyCredentials,
+        String platformInfo
+    ) throws BitPayGenericException {
+        Config config = this.buildConfigFromFile(configFilePath);
+        this.tokenContainer = new TokenContainer(config);
+        ECKey ecKey = this.getEcKey(config);
+        if (Objects.isNull(ecKey)) {
+            BitPayExceptionProvider.throwValidationException("Missing ECKey");
+        }
+
+        this.deriveIdentity(ecKey);
+        this.bitPayClient = new BitPayClient(
+            getHttpClient(proxy, proxyCredentials),
+            new HttpRequestFactory(),
+            getBaseUrl(config.getEnvironment()),
+            ecKey,
+            platformInfo
         );
         this.guidGenerator = new GuidGenerator();
     }
@@ -203,6 +309,18 @@ public class Client {
      * Create pos (light) client.
      *
      * @param token the token
+     * @param platformInfo the platform info
+     * @return the client
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public static Client createPosClient(PosToken token, String platformInfo) throws BitPayGenericException {
+        return new Client(token, platformInfo);
+    }
+
+    /**
+     * Create pos (light) client.
+     *
+     * @param token the token
      * @param environment environment
      * @return the client
      * @throws BitPayGenericException BitPayGenericException class
@@ -212,6 +330,23 @@ public class Client {
         Environment environment
     ) throws BitPayGenericException {
         return new Client(token, environment);
+    }
+
+    /**
+     * Create pos (light) client.
+     *
+     * @param token the token
+     * @param environment environment
+     * @param platformInfo the platform info
+     * @return the client
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public static Client createPosClient(
+        PosToken token,
+        Environment environment,
+        String platformInfo
+    ) throws BitPayGenericException {
+        return new Client(token, environment, platformInfo);
     }
 
     /**
@@ -236,12 +371,48 @@ public class Client {
     /**
      * Create standard client.
      *
+     * @param privateKey the private key
+     * @param tokenContainer the token container
+     * @param environment environment
+     * @param platformInfo the platform info
+     * @return Client Client
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public static Client createClientByPrivateKey(
+        PrivateKey privateKey,
+        TokenContainer tokenContainer,
+        Environment environment,
+        String platformInfo
+    ) throws BitPayGenericException {
+        Environment env = Objects.isNull(environment) ? Environment.PROD : environment;
+
+        return new Client(env, privateKey, tokenContainer, null, null, platformInfo);
+    }
+
+    /**
+     * Create standard client.
+     *
      * @param configFilePath the config file path
      * @return the client
      * @throws BitPayGenericException BitPayGenericException class
      */
     public static Client createClientByConfigFilePath(ConfigFilePath configFilePath) throws BitPayGenericException {
         return new Client(configFilePath, null, null);
+    }
+
+    /**
+     * Create standard client.
+     *
+     * @param configFilePath the config file path
+     * @param platformInfo the platform info
+     * @return the client
+     * @throws BitPayGenericException BitPayGenericException class
+     */
+    public static Client createClientByConfigFilePath(
+        ConfigFilePath configFilePath,
+        String platformInfo
+    ) throws BitPayGenericException {
+        return new Client(configFilePath, null, null, platformInfo);
     }
 
 
