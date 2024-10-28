@@ -85,6 +85,7 @@
                 <configuration>
                     <source>8</source>
                     <additionalOptions>-notimestamp</additionalOptions>
+                    <outputDirectory>${project.build.directory}/site</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
