@@ -217,7 +217,7 @@
         <profile>
             <id>java11plus</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>(11,)</jdk>
             </activation>
             <properties>
                 <maven.compiler.source>11</maven.compiler.source>
